@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cosine Wave Benchmarks: Flashcard Test</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#FAF9F8;--surface:#fff;--ink:#090A0E;--ink-2:#52525C;--ink-3:#71717B;--line:#E6DFDD;--greige:#F2EEED;--blue:#386EF5;--blue-soft:#EAF1FF;--good:#1F8A5B;--good-soft:#E7F5EE;--bad:#C2410C;--bad-soft:#FDEEE6;
+--display:"Cormorant Garamond",Georgia,serif;--text:Inter,system-ui,-apple-system,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#090A0E;--surface:#18181B;--ink:#FAF9F8;--ink-2:#D4D4D8;--ink-3:#9F9FA9;--line:#27272A;--greige:#202024;--blue:#5B8BFF;--blue-soft:#1A2440;--good:#4ADE9B;--good-soft:#123024;--bad:#FB923C;--bad-soft:#3A1E10}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--text)}
+.hero{background:radial-gradient(120% 140% at 85% 10%,#93C6FA 0%,#5E9BF8 28%,#386EF5 60%,#1F4FD6 100%);color:#FAF9F8}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+.hero .wrap{padding-top:40px;padding-bottom:32px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;opacity:.9}
+h1{font-family:var(--display);font-weight:500;font-size:clamp(34px,6vw,54px);line-height:1.05;margin:10px 0 10px;letter-spacing:-.02em}
+.hero p{margin:0;max-width:58ch;color:#F2F6FF}
+.modes{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+.modes button{font:500 14px var(--text);padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:transparent;color:#fff;cursor:pointer}
+.modes button.on{background:#fff;color:#1F4FD6;border-color:#fff}
+main.wrap{padding-top:28px;padding-bottom:60px}
+.progress{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-3);margin-bottom:10px}
+.track{height:4px;background:var(--greige);border-radius:4px;overflow:hidden;margin-bottom:22px}
+.track i{display:block;height:100%;background:var(--blue);transition:width .3s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px}
+.topic{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);font-weight:600}
+.q{font-family:var(--display);font-weight:600;font-size:clamp(24px,3.6vw,30px);line-height:1.2;margin:8px 0 20px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;font:15px/1.4 var(--text);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px;cursor:pointer;display:flex;gap:12px;align-items:flex-start}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--blue-soft)}
+.opt .k{flex:0 0 24px;height:24px;border-radius:6px;background:var(--greige);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--ink-2)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.right .k{background:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad);color:#fff}
+.fb{margin-top:18px;border-radius:10px;padding:16px 18px;font-size:15px}
+.fb.good{background:var(--good-soft);border-left:4px solid var(--good)}
+.fb.bad{background:var(--bad-soft);border-left:4px solid var(--bad)}
+.fb b.v{display:block;margin-bottom:4px}
+.fb p{margin:6px 0 0;color:var(--ink-2)}
+.fb p strong{color:var(--ink)}
+.actions{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px}
+.btn{font:500 14px var(--text);padding:10px 18px;border-radius:8px;border:0;background:var(--blue);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+/* flashcards */
+.flip{perspective:1400px;cursor:pointer}
+.flip .inner{position:relative;min-height:340px;transition:transform .5s;transform-style:preserve-3d}
+.flip.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px;display:flex;flex-direction:column;overflow:auto}
+.face.back{transform:rotateY(180deg)}
+.face .ans{font-family:var(--display);font-weight:600;font-size:clamp(28px,4.5vw,38px);line-height:1.1;color:var(--blue);margin:8px 0 12px}
+.face p{margin:0 0 10px;color:var(--ink-2);font-size:15px}
+.face p strong{color:var(--ink)}
+.hint{margin-top:auto;font-size:13px;color:var(--ink-3)}
+/* results */
+.score{font-family:var(--display);font-size:64px;font-weight:600;line-height:1;color:var(--blue)}
+.review{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.review div{font-size:14px;padding:10px 12px;border-radius:8px;background:var(--greige)}
+.review div.x{border-left:3px solid var(--bad)}
+.review div.ok{border-left:3px solid var(--good)}
+.src{font-size:13px;color:var(--ink-3);margin-top:28px}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Cosine · Wave on-prem inference · Sales enablement</div>
+  <h1>Know the numbers: Cosine vs stock</h1>
+  <p>10 questions per round, drawn from a bank of 20 on the 20 November 2026 benchmarks: Cosine's MLX and Exo forks against the stock Exo + MLX install, running a ~1T-parameter model across six M5 Ultra Mac Studios.</p>
+  <div class="modes">
+    <button id="mQuiz" class="on">Quiz</button>
+    <button id="mCards">Flashcards</button>
+  </div>
+  <p style="margin-top:10px;font-size:14px;opacity:.9">Every round has the 8 core sales questions plus 2 random ones from the technical pool, in a new order each time. Flashcards cover all 20.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="progress"><span id="pos"></span><span id="sc"></span></div>
+  <div class="track"><i id="bar"></i></div>
+  <div id="stage"></div>
+  <p class="src">Source: Wave Inference Benchmarks, measured 20 Nov 2026 on six Mac Studio M5 Ultra (256 GB each) over a Thunderbolt 5 RDMA mesh, 16 concurrent sessions. "Stock" is the install Wave ships: Exo rev. edc34b97 with MLX 0.32.4, untuned.</p>
+</main>
+
+<script>
+const Q = [
+ {core:1,t:"Headline result", q:"On light agentic chat (16 concurrent sessions), how much faster are Cosine's forks than stock?",
+  o:["1.5x faster","2.5x faster","4x faster","10x faster"], a:1,
+  fact:"2.5x: 65.4 tokens/s on Cosine's forks against 25.9 on stock.",
+  why:"Light agentic chat is the everyday enterprise case: short questions, pasted material and tool calls to a CRM, search or calendar. A 2.5x gain here means the same six Macs serve far more users, or each user gets an answer in less than half the time. Hardware cost per seat drops."},
+ {core:1,t:"Headline result", q:"What aggregate throughput do Cosine's forks reach on the short coding agent workload?",
+  o:["18.9 tokens/s","23.4 tokens/s","44.8 tokens/s","65.4 tokens/s"], a:2,
+  fact:"44.8 tokens/s, against 18.9 on stock: a 2.4x speed-up.",
+  why:"Coding agents read far more than they write (about 1,070 new prompt tokens per turn here, against ~420 for chat), so they're harder to serve. Holding a 2.4x lead on this heavier workload shows the gain isn't limited to easy traffic."},
+ {core:1,t:"Long context", q:"On the 128k coding agent workload, how did Cosine's forks and stock compare on completing the 96 planned turns?",
+  o:["Forks: 96/96 in 7 min. Stock: 6/96 in 50 min","Forks: 96/96 in 30 min. Stock: 48/96 in 30 min","Both finished; forks were 3x quicker","Forks: 80/96. Stock ran out of memory"], a:0,
+  fact:"Cosine's forks finished all 96 turns in about 7 minutes (429 s). Stock managed 6 of 96 in 50 minutes and was then stopped.",
+  why:"This is the strongest proof point. It isn't 'faster'; stock can't do the job at all in practice. Real coding agents live at 80k to 128k of context, so this is the difference between a usable on-prem agent platform and one that isn't."},
+ {core:1,t:"Long context", q:"Why did stock grind to a halt on the 128k workload?",
+  o:["It ran out of GPU memory","Its prefix cache couldn't hold 16 long histories, so each turn reprocessed almost the whole ~80k-token prompt","The Macs overheated and shut down","The model crashed with errors"], a:1,
+  fact:"Stock's prefix cache couldn't hold 16 long histories, so every turn reprocessed almost the entire ~80k-token prompt. It didn't run out of memory; it was just impractically slow.",
+  why:"This tells you how to frame it with a buyer: the bottleneck is software, not hardware. Cosine's one-cache-per-session design (120 GB budget per Mac, spilling to SSD) is what unlocks the same machines. Customers don't need to buy more hardware to get long-context agents."},
+ {t:"Long context", q:"What aggregate throughput did Cosine's forks sustain on the 128k coding agent workload?",
+  o:["≈0.1 tokens/s","5.1 tokens/s","23.44 tokens/s","44.78 tokens/s"], a:2,
+  fact:"23.44 tokens/s across 16 sessions. Stock managed about 0.1 tokens/s (290 tokens in 50 minutes).",
+  why:"23.44 against roughly 0.1 is effectively infinite improvement, but the absolute number matters too: it's a steady, usable rate with 16 agents each holding up to 128k of context on a trillion-parameter model. That's a credible team-sized deployment."},
+ {core:1,t:"Responsiveness", q:"What is the median time to first token on light agentic chat?",
+  o:["Forks 0.5 s, stock 1.2 s","Forks 1.7 s, stock 3.9 s","Forks 3.1 s, stock 5.3 s","Forks 5.1 s, stock 12 s"], a:1,
+  fact:"1.7 seconds on Cosine's forks against 3.9 seconds on stock. (Short coding: 3.1 s vs 5.3 s.)",
+  why:"Time to first token is what users feel. Under two seconds feels responsive; nearly four starts to feel sluggish. It's a good number for non-technical stakeholders who don't think in tokens per second."},
+ {t:"Responsiveness", q:"On the 128k workload, how long did stock's completed turns wait for a first token?",
+  o:["About 10 seconds","30 to 60 seconds","141 to 1,739 seconds","It never produced a token"], a:2,
+  fact:"Between 141 and 1,739 seconds (up to about 29 minutes). Cosine's forks had a median of 5.1 seconds.",
+  why:"Five seconds against up to half an hour is a vivid contrast for a demo or a slide. An agent that waits minutes before saying anything is unusable, whatever its eventual throughput."},
+ {core:1,t:"Setup", q:"What was the test setup?",
+  o:["A 70B model on one H100","Lumen Sovereign (~1T params, 4-bit) on six M5 Ultra Mac Studios, 16 concurrent sessions","A 405B model on eight Mac minis, 4 sessions","Lumen Sovereign on cloud GPUs, 64 sessions"], a:1,
+  fact:"Lumen Sovereign, about 1 trillion parameters at 4-bit, on six Mac Studio M5 Ultra (256 GB each) linked by a Thunderbolt 5 RDMA mesh, with 16 sessions running at once.",
+  why:"This is the on-prem story: a frontier-scale model on a desk-sized cluster of off-the-shelf Macs, no data centre and no data leaving the building. That matters to regulated and sovereignty-conscious buyers."},
+ {t:"Under the hood", q:"How fast is Cosine's fused attention kernel on the M5 GPU compared with MLX's default path?",
+  o:["Same speed, but less memory","About 60 vs 43 TFLOPS","97 to 104 vs 43 TFLOPS per Mac","200 vs 121 TFLOPS"], a:2,
+  fact:"97 to 104 TFLOPS per Mac against 43 for MLX's default path; a plain matrix multiply reaches 121, so the kernel gets close to the hardware ceiling.",
+  why:"It shows the gains come from real engineering in the stack, not tuning flags. More than doubling attention efficiency, close to the chip's limit, is hard for a competitor to copy quickly. It's a defensible moat."},
+ {t:"Under the hood", q:"With block-sparse prompt attention, how did prompt processing speed at 100k of context change?",
+  o:["717 → 1,238 tokens/s","400 → 717 tokens/s","1,238 → 2,500 tokens/s","No change; it only helps decode"], a:0,
+  fact:"From 717 to 1,238 prompt tokens/s (about 1.7x), lifting the long-context replay from 13.87 to 21.23 tokens/s.",
+  why:"Agents spend most of their time reading context, so prompt processing dominates at long context. Speeding up the reading step is what moves the long-context number; this is where the work was focused."},
+ {t:"Under the hood", q:"What did Cosine's prompt scheduler do to the worst stalls for running sessions?",
+  o:["Cut them from ~30 s to ~11 s","Cut them from ~11 s to 4 to 6 s","Removed stalls entirely","No effect on stalls"], a:1,
+  fact:"Worst stalls fell from about 11 seconds to 4 to 6 seconds. Prompts are processed in 4,096-token chunks, shortest first with ageing, so running sessions keep decoding in between.",
+  why:"Throughput averages can hide a bad experience. When one user pastes a big document, everyone else shouldn't freeze. Halving the worst stall makes a shared deployment feel fair, which matters when a whole team is on one cluster."},
+ {t:"Under the hood", q:"What does prompt-lookup speculation do for a single user decoding alone?",
+  o:["1.1x faster","1.6 to 1.8x faster single-stream decode","3x faster","It only helps batches of 16"], a:1,
+  fact:"1.6 to 1.8x faster single-stream decode, by guessing up to 16 tokens copied from the session's own context.",
+  why:"Not every moment is peak load. Off-hours or for a solo power user, the system still gets a big speed boost, so the benefit isn't only visible under heavy concurrency."},
+ {core:1,t:"Accuracy", q:"Moving from 8-bit to 4-bit weights, what was the top-1 disagreement with 8-bit on agent trajectories?",
+  o:["0.2%","2.2%, against 1.1% between two 8-bit runs","8.5%","15%"], a:1,
+  fact:"2.2% top-1 disagreement, against a baseline of 1.1% between two 8-bit runs.",
+  why:"This is the answer to 'did you just trade quality for speed?' The 4-bit change freed the memory 16 long sessions need, with disagreement close to the run-to-run noise of 8-bit itself. Be ready to quote both figures together."},
+ {core:1,t:"Handling objections", q:"Which caveat about block-sparse attention should you be ready to raise honestly?",
+  o:["It is exact and has no caveats","It's an approximation (1.86% top-1 disagreement vs a 0.78% noise floor), not yet task-evaluated, and inactive below 32k","It causes errors on most long runs","It only works on stock MLX"], a:1,
+  fact:"It's an approximation: 1.86% top-1 disagreement against exact attention at 100k (noise floor 0.78%), with no decisive token flipped. It hasn't had a task-level evaluation yet, and it's off below 32k, so the chat and short coding results use exact attention.",
+  why:"Raising this yourself builds trust with technical buyers. It also strengthens the pitch: the 2.5x and 2.4x headline wins use exact attention, and even without block-sparse the 128k forks reached 18.5 tokens/s against stock's ~0.1."},
+ {t:"Handling objections", q:"A prospect asks what 'stock' means in these benchmarks. What's the right answer?",
+  o:["A competitor's managed cloud service","The install Wave ships: Exo rev. edc34b97 with its own MLX 0.32.4, untuned, plus a 4-bit model card so it could load the model","A deliberately misconfigured setup","Stock MLX on a single Mac"], a:1,
+  fact:"Stock is the install Wave ships: Exo revision edc34b97 with its own MLX 0.32.4 and no tuning. The only addition was the 4-bit model card so it could load the model. Same six Macs, same model, same workloads.",
+  why:"This is your credibility answer. It's a like-for-like test on identical hardware against the default open-source stack, not a strawman, so every gain comes from Cosine's software. Be clear it isn't a comparison against other vendors."},
+ {t:"Handling objections", q:"On the short coding run, what was the longest gap between tokens?",
+  o:["No stalls on either build","106 s on Cosine's forks, 214 s on stock","4 to 6 s on both","11 s on forks, 30 s on stock"], a:1,
+  fact:"106 seconds on Cosine's forks against 214 seconds on stock. Both builds stall on this run.",
+  why:"Know this before a technical buyer finds it. The honest framing: worst-case stalls still exist, but Cosine roughly halves them, and the typical experience (3.1 s median first token) is far better than the outlier."},
+ {t:"Under the hood", q:"How does Cosine's Exo fork spread the model across the six Macs?",
+  o:["A pipeline: each Mac holds some layers and passes activations down","Tensor-parallel: all six Macs work on every token, splitting attention heads and experts","Each Mac runs its own full copy of the model","One Mac computes, the other five only store cache"], a:1,
+  fact:"Tensor-parallel serving: all six Macs work on every token, splitting attention heads and experts, instead of passing activations down a pipeline.",
+  why:"With a pipeline, most machines sit idle waiting their turn on any one token. Tensor-parallel keeps all six busy, which is part of why the same hardware delivers so much more."},
+ {t:"Under the hood", q:"How does the Exo fork handle each session's cache?",
+  o:["Copied in and out of every batch","One cache per session, never copied, with a 120 GB budget per Mac that spills to SSD","Shared by all sessions and cleared every turn","Kept on a single Mac per session"], a:1,
+  fact:"One cache per session, never copied: sessions join and leave a batch without their keys moving. Each Mac has a 120 GB cache budget and spills to SSD.",
+  why:"This is the direct fix for why stock collapsed at 128k. Keeping 16 long histories alive means agents don't reprocess their whole context every turn, which is what turns 6 of 96 into 96 of 96."},
+ {t:"Under the hood", q:"At one eighth of the older keys, how much faster does the block-sparse attention kernel run?",
+  o:["About 1.1x","About 1.9x, selector included","About 4x","About 8x"], a:1,
+  fact:"About 1.9x faster, including the cost of selecting which 32-key blocks to keep. The newest 8,192 keys are always kept in full.",
+  why:"It shows the approximation is used carefully: skipping 7/8 of older keys doesn't give 8x, because Cosine always keeps recent context exact and pays for smart selection. Quality is protected first, speed second."},
+ {t:"Under the hood", q:"How do the six Macs exchange data during a prompt chunk?",
+  o:["Over standard Ethernet, about 50 ms per exchange","An RDMA all-reduce over a Thunderbolt mesh: 122 reductions of 56 MiB at about 5.5 ms each","Through a cloud relay","They don't; each Mac works independently"], a:1,
+  fact:"A full RDMA mesh over Thunderbolt: one prompt chunk makes 122 reductions of 56 MiB at about 5.5 ms each.",
+  why:"Tensor-parallel only works if machines can talk fast. Building RDMA collectives into the MLX fork is what makes six consumer-grade Macs behave like one large accelerator, with no specialist networking kit."}
+];
+
+const stage=document.getElementById('stage'),pos=document.getElementById('pos'),sc=document.getElementById('sc'),bar=document.getElementById('bar');
+let mode='quiz',i=0,answers=[],order=[],set=[];
+function shuffle(n){const a=[...Array(n).keys()];for(let k=n-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function reset(){
+  const core=Q.filter(q=>q.core),pool=Q.filter(q=>!q.core);
+  const picks=shuffle(pool.length).slice(0,2).map(k=>pool[k]);
+  const ten=core.concat(picks);set=shuffle(ten.length).map(k=>ten[k]);
+  i=0;answers=Array(set.length).fill(null);order=set.map(q=>shuffle(q.o.length))}
+function h(tag,attrs={},html=''){const e=document.createElement(tag);for(const k in attrs)e.setAttribute(k,attrs[k]);e.innerHTML=html;return e}
+function score(){return answers.filter((a,k)=>a===set[k].a).length}
+function head(){
+  const done=answers.filter(a=>a!==null).length;
+  const N=mode==='quiz'?set.length:Q.length;
+  pos.textContent= mode==='quiz' ? `Question ${Math.min(i+1,N)} of ${N}` : `Card ${i+1} of ${N}`;
+  sc.textContent= mode==='quiz' ? `Score ${score()} / ${done}` : 'Click the card to flip';
+  bar.style.width=((mode==='quiz'?done:i+1)/N*100)+'%';
+}
+function renderQuiz(){
+  if(i>=set.length) return renderResults();
+  const q=set[i],c=h('div',{class:'card'});
+  c.append(h('div',{class:'topic'},q.t+(q.core?' · Core':'')),h('div',{class:'q'},q.q));
+  const opts=h('div',{class:'opts'}),chosen=answers[i];
+  order[i].forEach((oi,n)=>{
+    const b=h('button',{class:'opt'},`<span class="k">${'ABCD'[n]}</span><span>${q.o[oi]}</span>`);
+    if(chosen!==null){b.disabled=true;if(oi===q.a)b.classList.add('right');else if(oi===chosen)b.classList.add('wrong')}
+    b.onclick=()=>{answers[i]=oi;render()};
+    opts.append(b);
+  });
+  c.append(opts);
+  if(chosen!==null){
+    const ok=chosen===q.a;
+    c.append(h('div',{class:'fb '+(ok?'good':'bad')}, ok
+      ? `<b class="v">Correct. ${q.fact}</b><p><strong>Why it matters:</strong> ${q.why}</p>`
+      : `<b class="v">Not quite.</b><p><strong>The answer:</strong> ${q.fact}</p><p><strong>Why it matters:</strong> ${q.why}</p>`));
+  }
+  const act=h('div',{class:'actions'}),back=h('button',{class:'btn ghost'},'Back'),next=h('button',{class:'btn'},i===set.length-1?'See results':'Next');
+  back.disabled=i===0;next.disabled=chosen===null;
+  back.onclick=()=>{i--;render()};next.onclick=()=>{i++;render()};
+  act.append(back,next);c.append(act);stage.replaceChildren(c);
+}
+function renderResults(){
+  const s=score(),c=h('div',{class:'card'});
+  const msg=s===set.length?'Perfect. You know these cold.':s>=9?'Strong. Brush up on the ones below.':s>=6?'Getting there. Review the misses, then run it again.':'Worth another pass. Try flashcard mode first.';
+  c.append(h('div',{class:'topic'},'Results'),h('div',{class:'score'},`${s} / ${set.length}`),h('p',{},msg));
+  const r=h('div',{class:'review'});
+  set.forEach((q,k)=>{const ok=answers[k]===q.a;r.append(h('div',{class:ok?'ok':'x'},`${ok?'✓':'✗'} <strong>${q.q}</strong><br>${q.fact}`))});
+  c.append(r);
+  const act=h('div',{class:'actions'}),again=h('button',{class:'btn'},'Try again'),cards=h('button',{class:'btn ghost'},'Study as flashcards');
+  again.onclick=()=>{reset();render()};cards.onclick=()=>setMode('cards');
+  act.append(cards,again);c.append(act);stage.replaceChildren(c);
+  pos.textContent='Complete';
+}
+function renderCards(){
+  const q=Q[i],f=h('div',{class:'flip'});
+  f.innerHTML=`<div class="inner"><div class="face"><div class="topic">${q.t}${q.core?" · Core":""}</div><div class="q">${q.q}</div><div class="hint">Tap to reveal the answer</div></div>
+  <div class="face back"><div class="topic">${q.t}</div><div class="ans">${q.o[q.a]}</div><p>${q.fact}</p><p><strong>Why it matters:</strong> ${q.why}</p><div class="hint">Tap to flip back</div></div></div>`;
+  f.onclick=()=>f.classList.toggle('flipped');
+  const act=h('div',{class:'actions'}),back=h('button',{class:'btn ghost'},'Previous'),next=h('button',{class:'btn'},'Next');
+  back.disabled=i===0;next.disabled=i===Q.length-1;
+  back.onclick=()=>{i--;render()};next.onclick=()=>{i++;render()};
+  act.append(back,next);
+  const wrap=h('div');wrap.append(f,act);stage.replaceChildren(wrap);
+}
+function render(){head();mode==='quiz'?renderQuiz():renderCards()}
+function setMode(m){mode=m;i=0;if(m==='quiz')reset();document.getElementById('mQuiz').classList.toggle('on',m==='quiz');document.getElementById('mCards').classList.toggle('on',m==='cards');render()}
+document.getElementById('mQuiz').onclick=()=>setMode('quiz');
+document.getElementById('mCards').onclick=()=>setMode('cards');
+document.addEventListener('keydown',e=>{
+  if(mode==='quiz'&&i<set.length&&answers[i]===null){const n='abcd'.indexOf(e.key.toLowerCase());if(n>=0&&n<order[i].length){answers[i]=order[i][n];render()}}
+  else if(e.key==='ArrowRight'||e.key==='Enter'){if(mode==='cards'?i<Q.length-1:(i<set.length&&answers[i]!==null)){i++;render()}}
+  else if(e.key==='ArrowLeft'&&i>0){i--;render()}
+});
+reset();render();
+</script>
+</body>
+</html>
